@@ -16,6 +16,16 @@ def get_track():
         track.append((1, 0.01)) # ds (1m), kappa (1/r) (1/100)
     for _ in range(0, 100):
         track.append((1, 0)) # ds (1m), kappa (1/r)
+    for i in range(0, 600):
+        track.append((1, -0.001 + i*0.00002)) # ds (1m), kappa (1/r) (1/100 - 1/9999999)
+    for _ in range(0, 300):
+        track.append((1, 0)) # ds (1m), kappa (1/r)
+    for i in range(0, 50):
+        track.append((1, -0.001 + i*0.001)) # ds (1m), kappa (1/r) (1/100 - 1/9999999)
+    for i in range(0, 50):
+        track.append((1, 0.001 - i*0.001)) # ds (1m), kappa (1/r) (1/100 - 1/9999999)
+    for _ in range(0, 100):
+        track.append((1, 0.01)) # ds (1m), kappa (1/r) (1/100)
     
     return track
 

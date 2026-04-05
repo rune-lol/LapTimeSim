@@ -5,13 +5,14 @@
     - mu
     - mass
     - max power
+    - support for downforce/lift
 
 ## How does it work?
 ### 1. Import Track:
 Track is a list of tuples, element 0 is the arc length of the track segment, and the 1 element is the curvature `κ`. (Example `(1m, 1/100 m^-1)` would be a segment of arclength 1, with radius 1m to the right)
 
 ### 2. Calculate Maximum Speeds
-Create a list, `v_max`, containing the maximum steady state cornering speed at that track segment given that curvature `κ`. Formula: `v_max^2 = a_lat / κ`
+Create a list, `v_max`, containing the maximum steady state cornering speed at that track segment given that curvature `κ` and the aerodynamic characteristics of the car. Formula: `v_max^2 = a_lat / κ`, `sqrt((μ*m*G)/(m*abs(κ)+μ*0.5*ρ*Cl*A)`
 
 ### 3. Set Entry Conditions
 Create a new list v containing the physical speeds, by copying the v_max list. set the `v[0] = 0`.
@@ -23,7 +24,7 @@ The solver is run for 100 epochs. It contains 2 parts: forward and backward prop
 Forward propagation checks that for each segment, it is physically possible to accelerate to the max cornering speed as initialised. Realistically speaking the cornering speed v_max is higher than the physical speed.
   
 We check the lateral required cornering force: `F_lat = m*v_seg^2*κ`  
-We check total available grip: `F_total_available = μ*m*g`  
+We check total available grip: `F_total_available = μ*(m*g-0.5*ρ*v^2*Cl*A)`  
 Then we can calculate the longtitudinal force to reach the grip limit: `F_long = sqrt(F_total_available^2-F_lat^2)`  
   
 After we have the total longtitudinal grip left we calculate how hard our car can accelerate. This can be grip or power limited:  

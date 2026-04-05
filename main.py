@@ -3,27 +3,38 @@ import math
 from tracktools import get_track, draw_track, calcTotalTime, getTotalDistance
 
 G = 9.81 #m/s^2
-rho_air = 1.225 #kg/m^3
+RHO_AIR = 1.225 #kg/m^3
+STRAIGHT_LINE_CAP = 1_000
 
 car = {
-    'mu': 0.8, #mu
-    'P_max': 100_000, #W
-    'm': 1000, #kg
-    'ClA': -2.5 #m^2 * Cl (high downforce)
+    'mu': 1.7, #mu
+    'P_max': 600_000, #W
+    'm': 750, #kg
+    'ClA': -8 #m^2 * Cl (high downforce)
 }
 
+def get_fz(v):
+    return car['m']*G-0.5*RHO_AIR*(v**2)*car['ClA']
+
 def get_local_vmax(kappa):
-    return math.sqrt((car['mu']*G)/abs(kappa))
+    if kappa < 1e-6:
+        return STRAIGHT_LINE_CAP
+    
+    denom = (car['m']*abs(kappa)+car['mu']*0.5*RHO_AIR*car['ClA'])
+    if denom <= 0:
+        # aero dominant corner
+        return STRAIGHT_LINE_CAP
+
+    v_max = math.sqrt((car['mu']*car['m']*G)/denom)
+    return v_max
+    
 
 def get_max_corner_speeds(track):
     """a_lat = v^2 * kappa"""
     v_max = [0]*len(track)
     print(len(track), len(v_max))
     for i, segment in enumerate(track):
-        try:
-            v_max[i] = get_local_vmax(segment[1])
-        except ZeroDivisionError:
-            v_max[i] = 999_999_999 # absurdly high speed to cap, no car will ever reach
+        v_max[i] = get_local_vmax(segment[1])
 
     return v_max
 
@@ -55,7 +66,7 @@ def backward_propagation(track, v):
     for j, v_seg in enumerate(reversed(v)):
         i = len(v)-j-1
         F_lat = car['m']*(v_seg**2)*track[i][1]
-        F_total_available = car['mu']*car['m']*G
+        F_total_available = get_fz(track[i][1])*car['mu']
         F_longLeftover = math.sqrt(max(F_total_available**2 - F_lat**2, 0))
 
         accel_brake = -F_longLeftover/car['m']
@@ -66,7 +77,7 @@ def backward_propagation(track, v):
 def forward_propagation(track, v):
     for i, v_seg in enumerate(v):
         F_lat = car['m']*(v_seg**2)*track[i][1]
-        F_total_available = car['mu']*car['m']*G
+        F_total_available = get_fz(track[i][1])*car['mu']
         F_longLeftover = math.sqrt(max(F_total_available**2 - F_lat**2, 0))
         
         accel_grip_limited = F_longLeftover/car['m']
