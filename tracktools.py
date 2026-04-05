@@ -50,9 +50,17 @@ def draw_track(track, speed=None):
         new_coord = (x_n, y_n)
         lastCoord = new_coord
 
-    plt.figure()
+    plt.figure(figsize=(12, 6))
+    plt.subplot(121)
     plt.scatter(x, y, c=speed, cmap='plasma')
     plt.colorbar(label="Speed")
+    plt.axis('equal')
+    plt.xlabel("x [m]")
+    plt.ylabel("y [m]")
+    plt.title("Track Speed")
+    plt.subplot(122)
+    plt.scatter(x, y, c=[seg[1] for seg in track], cmap='viridis')
+    plt.colorbar(label="Curvature κ")
     plt.axis('equal')
     plt.xlabel("x [m]")
     plt.ylabel("y [m]")

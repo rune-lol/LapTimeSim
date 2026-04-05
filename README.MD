@@ -6,6 +6,7 @@
     - mass
     - max power
     - support for downforce/lift
+    - support for drag
 
 ## How does it work?
 ### 1. Import Track:
@@ -30,7 +31,7 @@ Then we can calculate the longtitudinal force to reach the grip limit: `F_long =
 After we have the total longtitudinal grip left we calculate how hard our car can accelerate. This can be grip or power limited:  
 `a_grip_limited = F_longLeftover/m` (we assume that we have perfect braking)  
 `a_power_limited = P_max / (v*m)`  
-We then of course pick the lower limit of acceleration we can apply and calculate the highest possible speed in the next cell.  
+We then of course pick the lower limit of acceleration we can apply and calculate the highest possible speed in the next cell. Do not forget to subtract the deceleration from drag.  
 `v[i] = sqrt(v^2+2*a*κ)`.
 We then check if the next cell is higher than this maximum attainable speed, and if so we set it to that max speed.  
   
@@ -38,7 +39,7 @@ This has the effect that at each moment acceleration is optimised.
 
 #### 4.2 Backward Propagation
 We iterate through every segment of the track in reverse and then we calculate the maximum longtitudinal grip left in the same way as in forward propagation.
-We again assume perfect braking and thus `a_braking = -F_longLeftover/m`.
+We again assume perfect braking and thus `a_braking = -F_longLeftover/m - 0.5*ρ*v^2*Cd*A`.
 We can then determine the absolute maximum speed in the segment before the current segment to ensure the car has braked to the current cells speed. `v[i-1] = min(v[i-1], v_prev)`  
   
 This has the effect that at any point the car optimally uses the grip limit regarding to braking.

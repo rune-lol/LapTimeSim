@@ -10,11 +10,15 @@ car = {
     'mu': 1.7, #mu
     'P_max': 600_000, #W
     'm': 750, #kg
-    'ClA': -8 #m^2 * Cl (high downforce)
+    'ClA': -9.1, #m^2 * Cl (high downforce)
+    'CdA': 1.4 #m^2 * Cl (high downforce)
 }
 
 def get_fz(v):
     return car['m']*G-0.5*RHO_AIR*(v**2)*car['ClA']
+
+def get_drag(v):
+    return 0.5*RHO_AIR*(v**2)*car['CdA']
 
 def get_local_vmax(kappa):
     if kappa < 1e-6:
@@ -69,7 +73,7 @@ def backward_propagation(track, v):
         F_total_available = get_fz(track[i][1])*car['mu']
         F_longLeftover = math.sqrt(max(F_total_available**2 - F_lat**2, 0))
 
-        accel_brake = -F_longLeftover/car['m']
+        accel_brake = -F_longLeftover/car['m'] - get_drag(v_seg)/car['m']
         v_prev = math.sqrt(v_seg**2 - 2*accel_brake*track[-i][0])
         if i-1 >= 0:
             v[i-1] = min(v[i-1], v_prev)
@@ -85,7 +89,7 @@ def forward_propagation(track, v):
             accel_power_limited = car['P_max']/(abs(v_seg)*car['m'])
         except ZeroDivisionError:
             accel_power_limited = accel_grip_limited
-        accel = min(accel_grip_limited, accel_power_limited)
+        accel = min(accel_grip_limited, accel_power_limited) - get_drag(v_seg)/car['m']
         v_next = math.sqrt(v_seg**2 + 2*accel*track[i][0])
         try:
             v[i+1] = min(v[i+1], v_next)
