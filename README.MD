@@ -10,7 +10,9 @@
 
 ## How does it work?
 ### 1. Import Track:
-Track is a list of tuples, element 0 is the arc length of the track segment, and the 1 element is the curvature `κ`. (Example `(1m, 1/100 m^-1)` would be a segment of arclength 1, with radius 1m to the right)
+Uses TUMFTM's dataset which is cloned from their github repository. We need to have the `ds` (arc lenght of the segment) and `κ`, the local curvature of the segment. `ds` is calculated easily enough using the formula: `ds = np.sqrt(dx**2 + dy**2)`. Local curvature `κ` is a little harder requiring this formula: `curvature = (dx_dt * d2y_dt2 - dy_dt * d2x_dt2) / (dx_dt**2 + dy_dt**2)**1.5`, noting that dt is not time but the paramter for the parametrised curve.
+  
+Track is a list of tuples, each tuple represents a track segment with the following properties: element 0 is the arc length of the track segment, and the 1 element is the curvature `κ`. (Example `(1m, 1/100 m^-1)` would be a segment of arclength 1, with radius 1m to the right)
 
 ### 2. Calculate Maximum Speeds
 Create a list, `v_max`, containing the maximum steady state cornering speed at that track segment given that curvature `κ` and the aerodynamic characteristics of the car. Formula: `v_max^2 = a_lat / κ`, `sqrt((μ*m*G)/(m*abs(κ)+μ*0.5*ρ*Cl*A)`
@@ -51,4 +53,5 @@ When running the forward and backward propagation multiple times behind eachothe
 At last we show the data to the user using matplotlib
 ---
 ## Dataset:
+Respect the licenses for the dataset (LGPL-3.0 license)  
 https://github.com/TUMFTM/racetrack-database/tree/master
