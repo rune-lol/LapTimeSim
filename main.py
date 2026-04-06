@@ -44,7 +44,7 @@ def get_max_corner_speeds(track):
 
 
 def main():
-    track = get_track()
+    track = get_track('.\\racelines\\Monza.csv')
 
     v_max = get_max_corner_speeds(track)
 
