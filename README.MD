@@ -1,6 +1,7 @@
 # Quasi steady state point mass lap time sim
 ## Supports:
-- Modular Tracks
+- Custom Tracks
+- Tracks imported from the TUM dataset (attribution below)
 - Car model:
     - mu
     - mass
