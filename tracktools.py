@@ -4,6 +4,8 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 
+from carModel import CarState
+
 def get_track(trackFileLocation):
     """Track is a list of segments, a tuple with arc length and kappa curvature (ds, kappa)"""
     track = []
@@ -35,7 +37,14 @@ def get_track(trackFileLocation):
 
     return track
 
-def draw_track(track, speed=None):
+def draw_track(track, car_state=None):
+    speed = []
+    if type(car_state[0]) == CarState:
+        for state in car_state:
+            speed.append(state.v)
+    elif type(car_state[0]) == float:
+        speed = car_state
+
     if speed is None:
         speed = [0]*len(track)
 
@@ -56,28 +65,20 @@ def draw_track(track, speed=None):
         new_coord = (x_n, y_n)
         lastCoord = new_coord
 
-    plt.figure(figsize=(12, 6))
-    plt.subplot(121)
+    plt.figure(figsize=(6, 3))
     plt.scatter(x, y, c=speed, cmap='plasma')
     plt.colorbar(label="Speed")
     plt.axis('equal')
     plt.xlabel("x [m]")
     plt.ylabel("y [m]")
     plt.title("Track Speed")
-    plt.subplot(122)
-    plt.scatter(x, y, c=[seg[1] for seg in track], cmap='viridis')
-    plt.colorbar(label="Curvature κ")
-    plt.axis('equal')
-    plt.xlabel("x [m]")
-    plt.ylabel("y [m]")
-    plt.title("Track layout")
     plt.show()
 
-def calcTotalTime(track, speedmap):
+def calcTotalTime(track, car_states):
     t = 0
     for i, seg in enumerate(track):
-        if speedmap[i] != 0:
-            t += seg[0]/speedmap[i]
+        if car_states[i].v != 0:
+            t += seg[0]/car_states[i].v
     return t
 
 def getTotalDistance(track):
