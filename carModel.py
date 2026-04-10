@@ -6,6 +6,7 @@ from physical_constants import RHO_AIR, G
 from powertrain_tools import get_coefficients
 
 STRAIGHT_LINE_CAP = 1_000.0
+AERO_DOMINANT_CAP = STRAIGHT_LINE_CAP/2
 
 @dataclass
 class CarModel:
@@ -75,13 +76,13 @@ class CarModel:
 
     def get_local_vmax(self, kappa):
         """Assumes lineair tyres, for initialising"""
-        if kappa < 1e-6:
+        if abs(kappa) < 1e-9:
             return STRAIGHT_LINE_CAP
 
         denom = (self.m*abs(kappa)+self.mu0*0.5*RHO_AIR*self.ClA)
         if denom <= 0:
             # aero dominant corner
-            return STRAIGHT_LINE_CAP
+            return AERO_DOMINANT_CAP
 
         v_max = math.sqrt((self.mu0*self.m*G)/denom)
         return v_max
@@ -89,7 +90,6 @@ class CarModel:
     def get_max_corner_speeds(self, track):
         """
         a_lat = v^2 * kappa
-        Assume lineair tyres
         """
         v_max = [0]*len(track)
         print(len(track), len(v_max))
@@ -112,4 +112,5 @@ class CarState:
     gear: int = 0
     rpm: int = 0
     forces: tuple[float, float] = (0, 0) # Lateral, Longtitudinal, in Newton
+    accel: tuple[float, float] = (0, 0) # Lateral, Longtitudinal, in m/s²
     v: float = 0 # speed in m/s

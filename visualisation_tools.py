@@ -1,5 +1,9 @@
 import matplotlib.pyplot as plt
+import numpy as np
 import math
+
+from carModel import CarState
+from physical_constants import G
 
 def draw_track(track, values, cmap = 'plasma', valname='Value'):
     heading = [0]*len(track)
@@ -57,6 +61,23 @@ def draw_curve(x, y):
     plt.plot(x, y)
     plt.tick_params(axis='y')
     plt.xlabel("x")
+    plt.show()
+
+def draw_GGV(car_states: list[CarState]):
+    x = []
+    y = []
+    speed = []
+
+    for state in car_states:
+        x.append(state.accel[0])
+        y.append(state.accel[1])
+        speed.append(state.v)
+    
+    plt.scatter(np.asarray(x)/G, np.asarray(y)/G, c=speed, cmap='viridis')
+    plt.colorbar(label='Speed')
+    plt.axis('equal')
+    plt.xlabel("a_lateral (G)")
+    plt.ylabel("a_longtitudinal (G)")
     plt.show()
 
 def get_cmap(n, name='hsv'):
