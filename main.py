@@ -13,10 +13,10 @@ EPOCHS_TO_RUN = 30
 
 car = CarModel(# Based on values from LMP2 Car
     mu0= 1.7,
-    load_sensitivity_factor= -0.15,
+    load_sensitivity_factor= -0.12,
     m= 950,
     ClA= -3.5,
-    CdA= 1.65,
+    CdA= 1.6,
 
     # Gibson GK428 V8
     # Educated guess;
@@ -37,16 +37,13 @@ car = CarModel(# Based on values from LMP2 Car
     # https://www.xtrac.com/product/p1159-transverse-lmp-gearbox/
     # Ratios are from iracing https://s100.iracing.com/wp-content/uploads/2023/10/UM-Dallara-P217-LMP2-Manual.pdf
     gear_ratios=[3.31834921, 2.56634921, 2.18438095, 1.89790476, 1.6591746, 1.48012698],
-    final_drive=2.9, # 47/15 / 42/16 / 43/18
-    trans_efficiency=0.92,
+    final_drive=2.8, # 47/15 / 42/16 / 43/18
+    trans_efficiency=0.95,
     driven_wheel_radius=0.3575, # lmp2 rear wheel
     shift_point=8900
 )
 
 def main():
-    # print the car
-    print(car)
-
     # show torque and power curve
     draw_curve(np.linspace(0, 9500, 1000), np.asarray([car.get_torque(x) for x in np.linspace(0, 9500, 1000)]))
     draw_curve(np.linspace(0, 9500, 1000), np.asarray([car.get_power(x) for x in np.linspace(0, 9500, 1000)]))

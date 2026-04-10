@@ -76,7 +76,7 @@ class CarModel:
 
     def get_local_vmax(self, kappa):
         """Assumes lineair tyres, for initialising"""
-        if abs(kappa) < 1e-9:
+        if abs(kappa) < 1e-6:
             return STRAIGHT_LINE_CAP
 
         denom = (self.m*abs(kappa)+self.mu0*0.5*RHO_AIR*self.ClA)
@@ -85,6 +85,12 @@ class CarModel:
             return AERO_DOMINANT_CAP
 
         v_max = math.sqrt((self.mu0*self.m*G)/denom)
+
+        for _ in range(3):
+            Fz = self.get_fz(v_max)
+            mu = self.get_mu(Fz)
+            v_max = math.sqrt((mu * Fz) / (self.m * abs(kappa)))
+        
         return v_max
     
     def get_max_corner_speeds(self, track):
@@ -92,7 +98,6 @@ class CarModel:
         a_lat = v^2 * kappa
         """
         v_max = [0]*len(track)
-        print(len(track), len(v_max))
         for i, segment in enumerate(track):
             v_max[i] = self.get_local_vmax(segment[1])
 
