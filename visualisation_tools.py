@@ -51,6 +51,14 @@ def draw_distancetrace(track, list_values, valname='Value'):
     plt.xlabel("x [m]")
     plt.show()
 
+def draw_curve(x, y):
+    plt.figure(figsize=(6, 3))
+
+    plt.plot(x, y)
+    plt.tick_params(axis='y')
+    plt.xlabel("x")
+    plt.show()
+
 def get_cmap(n, name='hsv'):
     '''Returns a function that maps each index in 0, 1, ..., n-1 to a distinct 
     RGB color; the keyword argument name must be a standard mpl colormap name.'''

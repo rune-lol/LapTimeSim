@@ -9,8 +9,8 @@ STRAIGHT_LINE_CAP = 1_000.0
 
 @dataclass
 class CarModel:
-    mu: float # tyre coefficient of friction
-    P_max: float # maximum power in watts
+    mu0: float # tyre coefficient of friction
+    load_sensitivity_factor: float
     m: float # mass in kilograms
     ClA: float # Cl * A, m^2, negative = downforce
     CdA: float # Cd * A, m^2
@@ -27,6 +27,9 @@ class CarModel:
     trans_efficiency: float
     driven_wheel_radius: float
     shift_point: int
+
+    def get_mu(self, fz):
+        return self.mu0 * ((fz/(self.m*G))**self.load_sensitivity_factor)
 
     def get_optimal_gear(self, speed):
         # Assume shifting at the same speed for every gear
@@ -71,19 +74,23 @@ class CarModel:
         return power
 
     def get_local_vmax(self, kappa):
+        """Assumes lineair tyres, for initialising"""
         if kappa < 1e-6:
             return STRAIGHT_LINE_CAP
 
-        denom = (self.m*abs(kappa)+self.mu*0.5*RHO_AIR*self.ClA)
+        denom = (self.m*abs(kappa)+self.mu0*0.5*RHO_AIR*self.ClA)
         if denom <= 0:
             # aero dominant corner
             return STRAIGHT_LINE_CAP
 
-        v_max = math.sqrt((self.mu*self.m*G)/denom)
+        v_max = math.sqrt((self.mu0*self.m*G)/denom)
         return v_max
     
     def get_max_corner_speeds(self, track):
-        """a_lat = v^2 * kappa"""
+        """
+        a_lat = v^2 * kappa
+        Assume lineair tyres
+        """
         v_max = [0]*len(track)
         print(len(track), len(v_max))
         for i, segment in enumerate(track):

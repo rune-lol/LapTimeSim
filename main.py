@@ -1,19 +1,20 @@
 import math
+import numpy as np
 
 from pyparsing import col
 
 from carModel import CarModel, CarState
 from tracktools import get_track, calcTotalTime, getTotalDistance
-from visualisation_tools import draw_distancetrace, draw_track
+from visualisation_tools import draw_distancetrace, draw_track, draw_curve
 from physical_constants import G, RHO_AIR
 from powertrain_tools import get_coefficients
 
 car = CarModel(# Based on values from LMP2 Car
-    mu= 1.7,
-    P_max= 375_000,
+    mu0= 1.7,
+    load_sensitivity_factor= -0.12,
     m= 950,
-    ClA= -5,
-    CdA= 1.75,
+    ClA= -4.5,
+    CdA= 1.65,
 
     # Gibson GK428 V8
     # Educated guess;
@@ -33,17 +34,20 @@ car = CarModel(# Based on values from LMP2 Car
     # Gearbox
     # https://www.xtrac.com/product/p1159-transverse-lmp-gearbox/
     # Ratios are from iracing https://s100.iracing.com/wp-content/uploads/2023/10/UM-Dallara-P217-LMP2-Manual.pdf
-    gear_ratios=[2.78, 2.15, 1.83, 1.59, 1.39, 1.24],
-    final_drive=47/15, # 47/15 / 42/16 / 43/18
+    gear_ratios=[3.31834921, 2.56634921, 2.18438095, 1.89790476, 1.6591746, 1.48012698],
+    final_drive=43/18, # 47/15 / 42/16 / 43/18
     trans_efficiency=0.95,
     driven_wheel_radius=0.3575, # lmp2 rear wheel
-    shift_point=8900
+    shift_point=8800
 )
 
 print(car)
 
+#draw_curve(np.linspace(0, 9500, 1000), np.asarray([car.get_torque(x) for x in np.linspace(0, 9500, 1000)]))
+#draw_curve(np.linspace(0, 9500, 1000), np.asarray([car.get_power(x) for x in np.linspace(0, 9500, 1000)]))
+
 def main():
-    track = get_track('.\\LapTimeSim\\racelines\\Spa.csv')
+    track = get_track('.\\racelines\\Spa.csv')
 
     v_max = car.get_max_corner_speeds(track)
 
@@ -87,7 +91,7 @@ def backward_propagation(track, car_states):
         v_seg = state.v
         i = len(car_states)-j-1
         F_lat = car.get_Flat(v_seg, track[i][1])
-        F_total_available = car.get_fz(track[i][1])*car.mu
+        F_total_available = car.get_fz(v_seg)*car.get_mu(car.get_fz(v_seg))
         F_longLeftover = math.sqrt(max(F_total_available**2 - F_lat**2, 0))
 
         accel_brake = -F_longLeftover/car.m - car.get_drag(v_seg)/car.m
@@ -99,7 +103,7 @@ def forward_propagation(track, car_states):
     for i, state in enumerate(car_states):
         v_seg = state.v
         F_lat = car.get_Flat(v_seg, track[i][1])
-        F_total_available = car.get_fz(track[i][1])*car.mu
+        F_total_available = car.get_fz(v_seg)*car.get_mu(car.get_fz(v_seg))
         F_longLeftover = math.sqrt(max(F_total_available**2 - F_lat**2, 0))
         
         accel_grip_limited = F_longLeftover/car.m
